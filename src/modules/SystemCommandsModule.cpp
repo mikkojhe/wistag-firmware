@@ -12,6 +12,7 @@
 #include "MeshService.h"
 #include "Module.h"
 #include "NodeDB.h"
+#include "mesh/Router.h"
 #include "main.h"
 #include "modules/AdminModule.h"
 #include "modules/ExternalNotificationModule.h"
@@ -111,6 +112,26 @@ int SystemCommandsModule::handleInputEvent(const InputEvent *event)
             IF_SCREEN(screen->showSimpleBanner("Node Info\nSent", 3000));
         }
         return true;
+    case INPUT_BROKER_SEND_TIC: {
+        static const char predefinedMessage[] = "TIC";
+        meshtastic_MeshPacket *p = router ? router->allocForSending() : nullptr;
+        if (!p) {
+            LOG_ERROR("Unable to allocate packet for TIC message");
+            return true;
+        }
+
+        p->to = NODENUM_BROADCAST;
+        p->channel = 0;
+        p->want_ack = false;
+        p->decoded.portnum = meshtastic_PortNum_TEXT_MESSAGE_APP;
+        p->decoded.payload.size = sizeof(predefinedMessage) - 1;
+        memcpy(p->decoded.payload.bytes, predefinedMessage, p->decoded.payload.size);
+
+        service->sendToMesh(p, RX_SRC_LOCAL, true);
+        LOG_INFO("Sent predefined TIC broadcast message");
+        IF_SCREEN(screen->showSimpleBanner("TIC\nSent", 3000));
+        return true;
+    }
     // Power control
     case INPUT_BROKER_SHUTDOWN:
         shutdownAtMsec = millis();
