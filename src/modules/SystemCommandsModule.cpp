@@ -128,8 +128,32 @@ int SystemCommandsModule::handleInputEvent(const InputEvent *event)
         memcpy(p->decoded.payload.bytes, predefinedMessage, p->decoded.payload.size);
 
         service->sendToMesh(p, RX_SRC_LOCAL, true);
-        LOG_INFO("Sent predefined TIC broadcast message");
+        service->refreshLocalMeshNode();
+        service->trySendPosition(NODENUM_BROADCAST, true);
+        LOG_INFO("Sent predefined TIC broadcast message with position");
         IF_SCREEN(screen->showSimpleBanner("TIC\nSent", 3000));
+        return true;
+    }
+    case INPUT_BROKER_SEND_MEDEVAC: {
+        static const char medevacMessage[] = "MEDEVAC";
+        meshtastic_MeshPacket *p = router ? router->allocForSending() : nullptr;
+        if (!p) {
+            LOG_ERROR("Unable to allocate packet for MEDEVAC message");
+            return true;
+        }
+
+        p->to = NODENUM_BROADCAST;
+        p->channel = 0;
+        p->want_ack = false;
+        p->decoded.portnum = meshtastic_PortNum_TEXT_MESSAGE_APP;
+        p->decoded.payload.size = sizeof(medevacMessage) - 1;
+        memcpy(p->decoded.payload.bytes, medevacMessage, p->decoded.payload.size);
+
+        service->sendToMesh(p, RX_SRC_LOCAL, true);
+        service->refreshLocalMeshNode();
+        service->trySendPosition(NODENUM_BROADCAST, true);
+        LOG_INFO("Sent predefined MEDEVAC broadcast message with position");
+        IF_SCREEN(screen->showSimpleBanner("MEDEVAC\nSent", 3000));
         return true;
     }
     // Power control

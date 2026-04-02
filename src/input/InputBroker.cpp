@@ -334,8 +334,8 @@ void InputBroker::Init()
         userConfigNoScreen.longPress = INPUT_BROKER_NONE;
         userConfigNoScreen.longPressTime = 500;
         userConfigNoScreen.longLongPress = INPUT_BROKER_SHUTDOWN;
-        userConfigNoScreen.doublePress = INPUT_BROKER_SEND_PING;
-        userConfigNoScreen.triplePress = INPUT_BROKER_SEND_TIC;
+        userConfigNoScreen.doublePress = INPUT_BROKER_SEND_TIC;
+        userConfigNoScreen.triplePress = INPUT_BROKER_SEND_MEDEVAC;
         UserButtonThread->initButton(userConfigNoScreen);
     }
 #endif
