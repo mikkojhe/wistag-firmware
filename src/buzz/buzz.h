@@ -12,6 +12,9 @@ void play4ClickUp();
 void playBoop();
 void playChirp();
 void playClick();
+void playTicAlert();
+void playMedevacSiren();
+void playCancelMelody();
 void playLongPressLeadUp();
 bool playNextLeadUpNote();  // Play the next note in the lead-up sequence
 void resetLeadUpSequence(); // Reset the lead-up sequence to start from beginning

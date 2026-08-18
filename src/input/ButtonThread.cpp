@@ -82,7 +82,8 @@ bool ButtonThread::initButton(const ButtonConfig &config)
             this);
     }
 
-    if (config.triplePress != INPUT_BROKER_NONE) {
+    _quadruplePress = config.quadruplePress;
+    if (config.triplePress != INPUT_BROKER_NONE || config.quadruplePress != INPUT_BROKER_NONE) {
         _triplePress = config.triplePress;
         userButton.attachMultiClick(
             [](void *callerThread) -> void {
@@ -230,7 +231,6 @@ int32_t ButtonThread::runOnce()
             evt.inputEvent = _doublePress;
             // evt.kbchar = _doublePress;
             this->notifyObservers(&evt);
-            playComboTune();
 
             break;
         }
@@ -246,23 +246,13 @@ int32_t ButtonThread::runOnce()
                 evt.inputEvent = _triplePress;
                 // evt.kbchar = _triplePress;
                 this->notifyObservers(&evt);
-                playComboTune();
                 break;
-#if !HAS_SCREEN
             case 4:
-                if (moduleConfig.external_notification.enabled && externalNotificationModule) {
-                    externalNotificationModule->setMute(!externalNotificationModule->getMute());
-                    IF_SCREEN(if (!externalNotificationModule->getMute()) externalNotificationModule->stopNow();)
-                    if (externalNotificationModule->getMute()) {
-                        LOG_INFO("Temporarily Muted");
-                        play4ClickDown(); // Disable tone
-                    } else {
-                        LOG_INFO("Unmuted");
-                        play4ClickUp(); // Enable tone
-                    }
+                if (_quadruplePress != INPUT_BROKER_NONE) {
+                    evt.inputEvent = _quadruplePress;
+                    this->notifyObservers(&evt);
                 }
                 break;
-#endif
             // No valid multipress action
             default:
                 break;

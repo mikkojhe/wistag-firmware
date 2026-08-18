@@ -194,6 +194,29 @@ void playBoop()
     playTones(melody, sizeof(melody) / sizeof(ToneDuration));
 }
 
+void playTicAlert()
+{
+    // Several rapid identical beeps for a TIC (troops in contact) alert
+    ToneDuration melody[] = {{NOTE_CS4, DURATION_1_16}, {NOTE_CS4, DURATION_1_16}, {NOTE_CS4, DURATION_1_16},
+                             {NOTE_CS4, DURATION_1_16}, {NOTE_CS4, DURATION_1_16}};
+    playTones(melody, sizeof(melody) / sizeof(ToneDuration));
+}
+
+void playMedevacSiren()
+{
+    // Ambulance-style two-tone "pii-paa" siren, repeated 3 times
+    ToneDuration melody[] = {{NOTE_A4, DURATION_1_4}, {NOTE_E4, DURATION_1_4}, {NOTE_A4, DURATION_1_4},
+                             {NOTE_E4, DURATION_1_4}, {NOTE_A4, DURATION_1_4}, {NOTE_E4, DURATION_1_4}};
+    playTones(melody, sizeof(melody) / sizeof(ToneDuration));
+}
+
+void playCancelMelody()
+{
+    // Descending melody: two short notes then one long note
+    ToneDuration melody[] = {{NOTE_G4, DURATION_1_8}, {NOTE_E4, DURATION_1_8}, {NOTE_C4, DURATION_1_2}};
+    playTones(melody, sizeof(melody) / sizeof(ToneDuration));
+}
+
 void playLongPressLeadUp()
 {
     // An ascending lead-up sequence for long press - builds anticipation

@@ -12,12 +12,18 @@
 #include "MeshService.h"
 #include "Module.h"
 #include "NodeDB.h"
+#include "buzz.h"
 #include "mesh/Router.h"
 #include "main.h"
 #include "modules/AdminModule.h"
 #include "modules/ExternalNotificationModule.h"
+#include "modules/PositionModule.h"
 
 SystemCommandsModule *systemCommandsModule;
+
+// Continuous positioning window started by single/double/triple press
+constexpr uint32_t kContinuousPositioningIntervalSecs = 60;
+constexpr uint32_t kContinuousPositioningDurationMs = 5 * 60 * 1000UL;
 
 static bool sendPredefinedBroadcastWithPosition(const char *label)
 {
@@ -142,14 +148,34 @@ int SystemCommandsModule::handleInputEvent(const InputEvent *event)
             IF_SCREEN(screen->showSimpleBanner("Node Info\nSent", 3000));
         }
         return true;
+    // Single press: start (or extend) the continuous positioning window
+    case INPUT_BROKER_USER_PRESS: {
+        positionModule->startTemporaryHighFrequencyBroadcast(kContinuousPositioningIntervalSecs, kContinuousPositioningDurationMs);
+        service->refreshLocalMeshNode();
+        service->trySendPosition(NODENUM_BROADCAST, true);
+        playBeep();
+        IF_SCREEN(screen->showSimpleBanner("Position\nTracking ON", 3000));
+        return true;
+    }
     case INPUT_BROKER_SEND_TIC: {
+        positionModule->startTemporaryHighFrequencyBroadcast(kContinuousPositioningIntervalSecs, kContinuousPositioningDurationMs);
         sendPredefinedBroadcastWithPosition("TIC");
+        playTicAlert();
         IF_SCREEN(screen->showSimpleBanner("TIC\nSent", 3000));
         return true;
     }
     case INPUT_BROKER_SEND_MEDEVAC: {
+        positionModule->startTemporaryHighFrequencyBroadcast(kContinuousPositioningIntervalSecs, kContinuousPositioningDurationMs);
         sendPredefinedBroadcastWithPosition("MEDEVAC");
+        playMedevacSiren();
         IF_SCREEN(screen->showSimpleBanner("MEDEVAC\nSent", 3000));
+        return true;
+    }
+    case INPUT_BROKER_SEND_CANCEL: {
+        sendPredefinedBroadcastWithPosition("CANCEL");
+        positionModule->cancelTemporaryHighFrequencyBroadcast();
+        playCancelMelody();
+        IF_SCREEN(screen->showSimpleBanner("CANCEL\nSent", 3000));
         return true;
     }
     // Power control

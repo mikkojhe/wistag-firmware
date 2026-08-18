@@ -24,6 +24,12 @@ class PositionModule : public ProtobufModule<meshtastic_Position>, private concu
     /// We force a rebroadcast if the radio settings change
     uint32_t currentGeneration = 0;
 
+    /// End time (millis()) of a temporarily accelerated broadcast interval, 0 if inactive
+    uint32_t temporaryIntervalOverrideEndMs = 0;
+
+    /// The user's normal broadcast interval, saved before a temporary override
+    uint32_t savedBroadcastSecs = 0;
+
   public:
     /** Constructor
      * name is for debugging output
@@ -37,6 +43,14 @@ class PositionModule : public ProtobufModule<meshtastic_Position>, private concu
     void sendOurPosition();
 
     void handleNewPosition();
+
+    /// Start (or reset the expiry timer of) a temporary high-frequency position broadcast window
+    void startTemporaryHighFrequencyBroadcast(uint32_t intervalSecs, uint32_t durationMs);
+
+    /// Immediately revert to the previously configured broadcast interval
+    void cancelTemporaryHighFrequencyBroadcast();
+
+    bool isTemporaryHighFrequencyActive() const { return temporaryIntervalOverrideEndMs != 0; }
 
   protected:
     /** Called to handle a particular incoming message

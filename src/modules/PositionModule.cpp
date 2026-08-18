@@ -411,8 +411,31 @@ void PositionModule::sendOurPosition(NodeNum dest, bool wantReplies, uint8_t cha
 
 #define RUNONCE_INTERVAL 5000;
 
+void PositionModule::startTemporaryHighFrequencyBroadcast(uint32_t intervalSecs, uint32_t durationMs)
+{
+    if (!isTemporaryHighFrequencyActive()) {
+        savedBroadcastSecs = config.position.position_broadcast_secs;
+        config.position.position_broadcast_secs = intervalSecs;
+    }
+    temporaryIntervalOverrideEndMs = millis() + durationMs;
+    LOG_INFO("Started temporary high-frequency position broadcast: %us interval for %ums", intervalSecs, durationMs);
+}
+
+void PositionModule::cancelTemporaryHighFrequencyBroadcast()
+{
+    if (!isTemporaryHighFrequencyActive())
+        return;
+    config.position.position_broadcast_secs = savedBroadcastSecs;
+    temporaryIntervalOverrideEndMs = 0;
+    LOG_INFO("Reverted position broadcast interval to %us", savedBroadcastSecs);
+}
+
 int32_t PositionModule::runOnce()
 {
+    if (isTemporaryHighFrequencyActive() && millis() >= temporaryIntervalOverrideEndMs) {
+        cancelTemporaryHighFrequencyBroadcast();
+    }
+
     if (sleepOnNextExecution == true) {
         sleepOnNextExecution = false;
         uint32_t nightyNightMs = Default::getConfiguredOrDefaultMs(config.position.position_broadcast_secs);

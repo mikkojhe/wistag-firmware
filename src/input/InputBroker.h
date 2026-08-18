@@ -30,6 +30,7 @@ enum input_broker_event {
     INPUT_BROKER_SEND_PING = 0xaf,
     INPUT_BROKER_SEND_TIC = 0xb0,
     INPUT_BROKER_SEND_MEDEVAC = 0xb1,
+    INPUT_BROKER_SEND_CANCEL = 0xb2,
     INPUT_BROKER_FN_F1 = 0xf1,
     INPUT_BROKER_FN_F2 = 0xf2,
     INPUT_BROKER_FN_F3 = 0xf3,
